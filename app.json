@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Kaza Namazı Takip",
+    "slug": "kaza-namaz-takip",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0d0d1a",
+      "resizeMode": "contain"
+    },
+    "android": {
+      "package": "com.kazanamaz.takip",
+      "versionCode": 1,
+      "backgroundColor": "#0d0d1a"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c289cfc3-6d9d-45b6-b3bc-5f9ddc546f44"
+      }
+    }
+  }
+}

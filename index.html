@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Kaza Namazı Takip</title>
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d1a;
+      --surface: #16162a;
+      --surface2: #1e1e38;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: rgba(201,168,76,0.15);
+      --teal: #4ecdc4;
+      --text: #f0ede6;
+      --text-dim: #8a8aaa;
+      --border: rgba(201,168,76,0.2);
+      --shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,168,76,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(78,205,196,0.06) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+    /* ─── SCREENS ─── */
+    .screen { display: none; padding: 24px 20px 100px; animation: fadeIn 0.4s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    /* ─── HEADER ─── */
+    header {
+      text-align: center;
+      padding: 40px 20px 28px;
+      position: relative;
+    }
+    .logo-arabic {
+      font-family: 'Amiri', serif;
+      font-size: 2.2rem;
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-shadow: 0 0 30px rgba(201,168,76,0.4);
+      display: block;
+    }
+    .logo-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .divider {
+      width: 60px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 16px auto;
+    }
+
+    /* ─── ONBOARDING ─── */
+    .onboard-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px 24px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .onboard-card h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--gold-light);
+    }
+    .onboard-card p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .input-group input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      padding: 14px 18px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-group input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+    .input-group input::placeholder { color: var(--text-dim); font-weight: 400; font-size: 1rem; }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), #a8813a);
+      color: #0d0d1a;
+    }
+    .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      margin-top: 10px;
+    }
+
+    /* ─── TOP BAR ─── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 0;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    .top-bar-title {
+      font-family: 'Amiri', serif;
+      font-size: 1.3rem;
+      color: var(--gold);
+    }
+    .prayer-time-badge {
+      background: var(--gold-dim);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: flex;
+      gap: 10px;
+      padding: 16px 20px;
+    }
+    .stat-card {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ─── PRAYER CARDS ─── */
+    .prayer-list { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+
+    .prayer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .prayer-card.completed {
+      border-color: rgba(78,205,196,0.4);
+    }
+    .prayer-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--gold);
+      border-radius: 3px 0 0 3px;
+      opacity: 0.6;
+    }
+    .prayer-card.completed::before { background: var(--teal); opacity: 0.8; }
+
+    .prayer-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--gold-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .prayer-card.completed .prayer-icon {
+      background: rgba(78,205,196,0.1);
+    }
+
+    .prayer-info { flex: 1; min-width: 0; }
+    .prayer-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .prayer-arabic {
+      font-family: 'Amiri', serif;
+      font-size: 0.85rem;
+      color: var(--gold);
+      margin-top: 2px;
+    }
+    .prayer-time-small {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .counter-btn {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--gold-light);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .counter-btn:active { transform: scale(0.9); background: var(--gold-dim); }
+    .counter-btn.minus { color: #e07070; }
+
+    .counter-value {
+      min-width: 52px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--gold-light);
+    }
+    .counter-value.zero { color: var(--text-dim); }
+    .counter-value.done { color: var(--teal); }
+
+    /* ─── SECTION TITLE ─── */
+    .section-title {
+      padding: 20px 20px 10px;
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ─── NEXT PRAYER BANNER ─── */
+    .next-prayer-banner {
+      margin: 0 20px 16px;
+      background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .next-label { font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); }
+    .next-name { font-size: 1.1rem; font-weight: 800; color: var(--gold-light); margin-top: 4px; }
+    .next-time { font-size: 1.8rem; font-weight: 900; color: var(--gold); font-variant-numeric: tabular-nums; }
+
+    /* ─── NOTIFY TOGGLE ─── */
+    .notify-row {
+      margin: 0 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .notify-row span { font-size: 0.9rem; font-weight: 600; color: var(--text-dim); }
+
+    .toggle {
+      position: relative;
+      width: 46px; height: 26px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--surface2);
+      border-radius: 26px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: 0.3s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--gold-dim); border-color: var(--gold); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); background: var(--gold); }
+
+    /* ─── BOTTOM NAV ─── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: rgba(22,22,42,0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+    }
+    .nav-item {
+      flex: 1;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: none;
+      color: var(--text-dim);
+    }
+    .nav-item.active { color: var(--gold); }
+    .nav-icon { font-size: 1.4rem; }
+    .nav-label { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; font-weight: 600; }
+
+    /* ─── SETTINGS ─── */
+    .settings-section { padding: 0 20px; margin-bottom: 20px; }
+    .settings-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .settings-row {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row-label { font-size: 0.95rem; font-weight: 600; }
+    .settings-row-sub { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+    .settings-row-value { color: var(--gold); font-weight: 700; }
+
+    /* ─── PROGRESS RING ─── */
+    .progress-wrap { position: relative; width: 80px; height: 80px; }
+    .progress-ring { transform: rotate(-90deg); }
+    .progress-ring circle { fill: none; }
+    .progress-bg { stroke: var(--surface2); stroke-width: 6; }
+    .progress-fill { stroke: var(--gold); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+    .progress-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: var(--gold-light);
+    }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      padding: 14px 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+      max-width: 320px;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══════════════════════════════ ONBOARDING ══════════════════════════════ -->
+  <div class="screen active" id="screen-onboard">
+    <header>
+      <span class="logo-arabic">قضاء النماز</span>
+      <div class="logo-sub">Kaza Namazı Takip</div>
+      <div class="divider"></div>
+    </header>
+    <div class="onboard-card">
+      <h2>Hoş Geldiniz</h2>
+      <p>Kılınamamış namazlarınızı takip etmek için önce kaç yıllık kaza namazınız olduğunu giriniz.</p>
+
+      <div class="input-group">
+        <label>Kaç yıllık kaza namazı?</label>
+        <input type="number" id="years-input" placeholder="Örnek: 5" min="0" max="80" />
+      </div>
+
+      <div id="gender-toggle" style="display:flex; gap:10px; margin-bottom:20px;">
+        <button class="btn btn-secondary" id="btn-erkek" onclick="selectGender('erkek')" style="flex:1; padding:12px;">Erkek</button>
+        <button class="btn btn-secondary" id="btn-kadin" onclick="selectGender('kadin')" style="flex:1; padding:12px;">Kadın</button>
+      </div>
+      <p style="font-size:0.78rem; color:var(--text-dim); margin-bottom:20px;">
+        Kadın seçimi Ramazan hesabı için kullanılır (her yıl ~7 gün fark). Erkek için Vitr namazı da dahil edilir.
+      </p>
+
+      <button class="btn btn-primary" onclick="startApp()">Devam Et →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ ANA EKRAN ══════════════════════════════ -->
+  <div class="screen" id="screen-main">
+    <div class="top-bar">
+      <span class="top-bar-title">قضاء النماز</span>
+      <div class="prayer-time-badge" id="current-time-badge">--:--</div>
+    </div>
+
+    <!-- Next prayer banner -->
+    <div class="next-prayer-banner" id="next-prayer-banner">
+      <div>
+        <div class="next-label">Bir Sonraki Vakit</div>
+        <div class="next-name" id="next-name">Yükleniyor...</div>
+      </div>
+      <div class="next-time" id="next-time">--:--</div>
+    </div>
+
+    <!-- Notification toggle -->
+    <div class="notify-row">
+      <span>🔔 Vakit Bildirimleri</span>
+      <label class="toggle">
+        <input type="checkbox" id="notify-toggle" onchange="toggleNotifications(this.checked)" />
+        <div class="toggle-slider"></div>
+      </label>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Toplam</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-done">0</div>
+        <div class="stat-label">Kılınan</div>
+      </div>
+      <div class="stat-card" style="align-items:center; display:flex; flex-direction:column; justify-content:center;">
+        <div class="progress-wrap">
+          <svg class="progress-ring" width="80" height="80" viewBox="0 0 80 80">
+            <circle class="progress-bg" cx="40" cy="40" r="32" />
+            <circle class="progress-fill" id="progress-circle" cx="40" cy="40" r="32"
+              stroke-dasharray="201" stroke-dashoffset="201" />
+          </svg>
+          <div class="progress-text" id="progress-pct">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Kaza Namazları</div>
+    <div class="prayer-list" id="prayer-list"></div>
+  </div>
+
+  <!-- ══════════════════════════════ AYARLAR ══════════════════════════════ -->
+  <div class="screen" id="screen-settings">
+    <header style="padding-top:20px; text-align:left; padding-left:0;">
+      <div class="logo-sub" style="padding:0 20px; margin-bottom:8px;">AYARLAR</div>
+    </header>
+    <div class="settings-section">
+      <div class="settings-card">
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Yıl Sayısı</div>
+            <div class="settings-row-sub">Kaza namazı yıl sayısı</div>
+          </div>
+          <div class="settings-row-value" id="s-years">—</div>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Cinsiyet</div>
+          </div>
+          <div class="settings-row-value" id="s-gender">—</div>
+        </div>
+        <div class="settings-row" onclick="resetApp()" style="cursor:pointer;">
+          <div>
+            <div class="settings-row-label" style="color:#e07070;">Sıfırla</div>
+            <div class="settings-row-sub">Tüm verileri sil</div>
+          </div>
+          <div>🗑️</div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-card">
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Konum</div>
+            <div class="settings-row-sub" id="s-location">İzin verilmedi</div>
+          </div>
+          <button class="btn btn-secondary" style="width:auto; padding:8px 16px; font-size:0.8rem;" onclick="requestLocation()">Güncelle</button>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Bildirimler</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="notify-toggle-s" onchange="toggleNotifications(this.checked)" />
+            <div class="toggle-slider"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section" style="margin-top:8px;">
+      <p style="font-size:0.78rem; color:var(--text-dim); text-align:center; line-height:1.6;">
+        Namaz vakitleri Aladhan API'si üzerinden hesaplanmaktadır.<br/>Hanefî metodu kullanılmaktadır.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ BOTTOM NAV ══════════════════════════════ -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-main" onclick="showScreen('main')">
+      <div class="nav-icon">🕌</div>
+      <div class="nav-label">Namazlar</div>
+    </button>
+    <button class="nav-item" id="nav-settings" onclick="showScreen('settings')">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Ayarlar</div>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let state = {
+  setup: false,
+  years: 0,
+  gender: 'erkek',
+  counts: { sabah: 0, ogle: 0, ikindi: 0, aksam: 0, yatsi: 0, vitr: 0 },
+  doneCounts: { sabah: 0, ogle: 0, ikindi: 0, aksam: 0, yatsi: 0, vitr: 0 },
+  location: null,
+  prayerTimes: null,
+  notifyEnabled: false
+};
+
+const PRAYERS = [
+  { key: 'sabah',  name: 'Sabah',  arabic: 'صَلاةُ الْفَجْر',  icon: '🌅', timeKey: 'Fajr' },
+  { key: 'ogle',   name: 'Öğle',   arabic: 'صَلاةُ الظُّهْر',  icon: '☀️', timeKey: 'Dhuhr' },
+  { key: 'ikindi', name: 'İkindi', arabic: 'صَلاةُ الْعَصْر',  icon: '🌤', timeKey: 'Asr' },
+  { key: 'aksam',  name: 'Akşam',  arabic: 'صَلاةُ الْمَغْرِب', icon: '🌇', timeKey: 'Maghrib' },
+  { key: 'yatsi',  name: 'Yatsı',  arabic: 'صَلاةُ الْعِشَاء', icon: '🌙', timeKey: 'Isha' },
+  { key: 'vitr',   name: 'Vitir',  arabic: 'صَلاةُ الْوِتْر',  icon: '⭐', timeKey: null }
+];
+
+// ═══════════════════════════════════════════════════════
+//  PERSIST
+// ═══════════════════════════════════════════════════════
+function saveState() { localStorage.setItem('kazaState', JSON.stringify(state)); }
+function loadState() {
+  const s = localStorage.getItem('kazaState');
+  if (s) { state = { ...state, ...JSON.parse(s) }; }
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENDER SELECT
+// ═══════════════════════════════════════════════════════
+function selectGender(g) {
+  state.gender = g;
+  document.getElementById('btn-erkek').style.borderColor = g === 'erkek' ? 'var(--gold)' : 'var(--border)';
+  document.getElementById('btn-erkek').style.color = g === 'erkek' ? 'var(--gold-light)' : 'var(--text-dim)';
+  document.getElementById('btn-kadin').style.borderColor = g === 'kadin' ? 'var(--gold)' : 'var(--border)';
+  document.getElementById('btn-kadin').style.color = g === 'kadin' ? 'var(--gold-light)' : 'var(--text-dim)';
+}
+selectGender('erkek');
+
+// ═══════════════════════════════════════════════════════
+//  CALCULATE INITIAL COUNTS
+// ═══════════════════════════════════════════════════════
+function calculateCounts(years, gender) {
+  // Günde 5 vakit, erkeklerde vitr de var
+  // Kadınlarda yılda ~14 gün (ortalama hayız) çıkarılır
+  const daysPerYear = gender === 'kadin' ? 351 : 365;
+  const totalDays = years * daysPerYear;
+  const prayers5 = totalDays;
+  return {
+    sabah:  prayers5,
+    ogle:   prayers5,
+    ikindi: prayers5,
+    aksam:  prayers5,
+    yatsi:  prayers5,
+    vitr:   gender === 'erkek' ? prayers5 : 0
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  START APP
+// ═══════════════════════════════════════════════════════
+function startApp() {
+  const y = parseInt(document.getElementById('years-input').value);
+  if (!y || y < 0 || y > 80) { showToast('Lütfen geçerli bir yıl sayısı girin'); return; }
+  state.years = y;
+  state.counts = calculateCounts(y, state.gender);
+  state.doneCounts = { sabah: 0, ogle: 0, ikindi: 0, aksam: 0, yatsi: 0, vitr: 0 };
+  state.setup = true;
+  saveState();
+  showScreen('main');
+  requestLocation();
+  requestNotificationPermission();
+}
+
+// ═══════════════════════════════════════════════════════
+//  SCREENS
+// ═══════════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (name === 'main') {
+    document.getElementById('screen-main').classList.add('active');
+    document.getElementById('nav-main').classList.add('active');
+    renderPrayerList();
+    updateStats();
+  } else if (name === 'settings') {
+    document.getElementById('screen-settings').classList.add('active');
+    document.getElementById('nav-settings').classList.add('active');
+    renderSettings();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER PRAYER LIST
+// ═══════════════════════════════════════════════════════
+function renderPrayerList() {
+  const list = document.getElementById('prayer-list');
+  list.innerHTML = '';
+  PRAYERS.forEach(p => {
+    if (p.key === 'vitr' && state.gender === 'kadin') return;
+    const remaining = state.counts[p.key] - state.doneCounts[p.key];
+    const done = remaining <= 0;
+    const timeStr = getTimeStr(p.timeKey);
+
+    const card = document.createElement('div');
+    card.className = 'prayer-card' + (done ? ' completed' : '');
+    card.innerHTML = `
+      <div class="prayer-icon">${done ? '✅' : p.icon}</div>
+      <div class="prayer-info">
+        <div class="prayer-name">${p.name}</div>
+        <div class="prayer-arabic">${p.arabic}</div>
+        ${timeStr ? `<div class="prayer-time-small">⏰ ${timeStr}</div>` : ''}
+      </div>
+      <div class="counter-controls">
+        <button class="counter-btn minus" onclick="changeCount('${p.key}', -1)">−</button>
+        <div class="counter-value ${done ? 'done' : remaining === 0 ? 'zero' : ''}" id="cv-${p.key}">
+          ${done ? '✓' : remaining.toLocaleString('tr-TR')}
+        </div>
+        <button class="counter-btn" onclick="changeCount('${p.key}', 1)">+</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function getTimeStr(timeKey) {
+  if (!timeKey || !state.prayerTimes) return null;
+  return state.prayerTimes[timeKey] || null;
+}
+
+// ═══════════════════════════════════════════════════════
+//  COUNT CHANGE
+// ═══════════════════════════════════════════════════════
+function changeCount(key, delta) {
+  if (delta > 0) {
+    // artı = kaza arttır (önceki namaz gözden kaçtı)
+    state.counts[key] = Math.max(0, state.counts[key] + 1);
+  } else {
+    // eksi = kaza kılındı
+    state.doneCounts[key] = Math.min(state.counts[key], state.doneCounts[key] + 1);
+  }
+  saveState();
+  renderPrayerList();
+  updateStats();
+}
+
+// ═══════════════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════════════
+function updateStats() {
+  const total = Object.values(state.counts).reduce((a,b) => a+b, 0);
+  const done = Object.values(state.doneCounts).reduce((a,b) => a+b, 0);
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('stat-total').textContent = (total - done).toLocaleString('tr-TR');
+  document.getElementById('stat-done').textContent = done.toLocaleString('tr-TR');
+  document.getElementById('progress-pct').textContent = pct + '%';
+
+  const circ = 2 * Math.PI * 32; // 201.06
+  const offset = circ - (pct / 100) * circ;
+  document.getElementById('progress-circle').style.strokeDashoffset = offset;
+}
+
+// ═══════════════════════════════════════════════════════
+//  SETTINGS RENDER
+// ═══════════════════════════════════════════════════════
+function renderSettings() {
+  document.getElementById('s-years').textContent = state.years + ' yıl';
+  document.getElementById('s-gender').textContent = state.gender === 'erkek' ? 'Erkek' : 'Kadın';
+  if (state.location) {
+    document.getElementById('s-location').textContent =
+      `${state.location.lat.toFixed(3)}, ${state.location.lon.toFixed(3)}`;
+  }
+  document.getElementById('notify-toggle-s').checked = state.notifyEnabled;
+}
+
+function resetApp() {
+  if (!confirm('Tüm veriler silinecek. Emin misiniz?')) return;
+  localStorage.removeItem('kazaState');
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════════
+//  LOCATION & PRAYER TIMES
+// ═══════════════════════════════════════════════════════
+function requestLocation() {
+  if (!navigator.geolocation) { showToast('Tarayıcınız konum desteklemiyor'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    state.location = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    saveState();
+    fetchPrayerTimes();
+    if (document.getElementById('s-location')) {
+      document.getElementById('s-location').textContent =
+        `${state.location.lat.toFixed(3)}, ${state.location.lon.toFixed(3)}`;
+    }
+  }, () => { showToast('Konum alınamadı'); });
+}
+
+async function fetchPrayerTimes() {
+  if (!state.location) return;
+  try {
+    const { lat, lon } = state.location;
+    const today = new Date();
+    const d = today.getDate(), m = today.getMonth()+1, y = today.getFullYear();
+    const url = `https://api.aladhan.com/v1/timings/${d}-${m}-${y}?latitude=${lat}&longitude=${lon}&method=13&school=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+    state.prayerTimes = data.data.timings;
+    saveState();
+    renderPrayerList();
+    updateNextPrayer();
+    scheduleNotifications();
+  } catch(e) { console.warn('Namaz vakitleri alınamadı', e); }
+}
+
+function updateNextPrayer() {
+  if (!state.prayerTimes) return;
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const keys = [
+    { name: 'Sabah', key: 'Fajr' },
+    { name: 'Öğle', key: 'Dhuhr' },
+    { name: 'İkindi', key: 'Asr' },
+    { name: 'Akşam', key: 'Maghrib' },
+    { name: 'Yatsı', key: 'Isha' }
+  ];
+  let next = null;
+  for (const k of keys) {
+    const t = state.prayerTimes[k.key];
+    if (!t) continue;
+    const [h, min] = t.split(':').map(Number);
+    const tMin = h * 60 + min;
+    if (tMin > nowMin) { next = { ...k, time: t }; break; }
+  }
+  if (!next) next = { name: 'Sabah', time: state.prayerTimes['Fajr'] };
+  document.getElementById('next-name').textContent = next.name;
+  document.getElementById('next-time').textContent = next.time;
+}
+
+// ═══════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ═══════════════════════════════════════════════════════
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    state.notifyEnabled = true;
+    document.getElementById('notify-toggle').checked = true;
+    saveState();
+  }
+}
+
+function toggleNotifications(checked) {
+  state.notifyEnabled = checked;
+  document.getElementById('notify-toggle').checked = checked;
+  if (document.getElementById('notify-toggle-s'))
+    document.getElementById('notify-toggle-s').checked = checked;
+  saveState();
+  if (checked) {
+    requestNotificationPermission();
+    scheduleNotifications();
+  }
+}
+
+function scheduleNotifications() {
+  if (!state.notifyEnabled || !state.prayerTimes || !('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+
+  const prayers = [
+    { name: 'Sabah', key: 'Fajr' },
+    { name: 'Öğle', key: 'Dhuhr' },
+    { name: 'İkindi', key: 'Asr' },
+    { name: 'Akşam', key: 'Maghrib' },
+    { name: 'Yatsı', key: 'Isha' }
+  ];
+
+  prayers.forEach(p => {
+    const t = state.prayerTimes[p.key];
+    if (!t) return;
+    const [h, min] = t.split(':').map(Number);
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(h, min, 0, 0);
+    const diff = target - now;
+    if (diff > 0 && diff < 86400000) {
+      setTimeout(() => {
+        new Notification(`🕌 ${p.name} Vakti – ${t}`, {
+          body: `Kaza ${p.name} namazınızı kılmayı unutmayın!`,
+          icon: 'icon-192.png',
+          badge: 'icon-192.png',
+          tag: `prayer-${p.key}`
+        });
+      }, diff);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  const el = document.getElementById('current-time-badge');
+  if (el) el.textContent = t;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+loadState();
+if (state.setup) {
+  document.getElementById('screen-onboard').classList.remove('active');
+  showScreen('main');
+  if (state.location) fetchPrayerTimes();
+  else requestLocation();
+  if (state.notifyEnabled) document.getElementById('notify-toggle').checked = true;
+} else {
+  document.getElementById('screen-onboard').classList.add('active');
+}
+
+// Refresh times daily
+setInterval(() => { if (state.location) fetchPrayerTimes(); }, 3600000);
+setInterval(updateNextPrayer, 60000);
+</script>
+</body>
+</html>
