@@ -178,18 +178,6 @@ Build tamamlandığında [expo.dev](https://expo.dev) hesabınızdan APK'yı ind
 
 ---
 
-## 🤝 Katkı
-
-Pull request ve issue'lar memnuniyetle karşılanır.
-
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/yeni-ozellik`)
-3. Commit edin (`git commit -m 'feat: yeni özellik eklendi'`)
-4. Push edin (`git push origin feature/yeni-ozellik`)
-5. Pull Request açın
-
----
-
 <div align="center">
 
 **بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ**
