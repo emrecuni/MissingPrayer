@@ -1,110 +1,206 @@
-# Kaza Namazı Takip Uygulaması
+# 🕌 Kaza Namazı Takip
 
-Kılınamamış namazları takip etmek, namaz vakitlerini konumdan almak ve bildirim almak için geliştirilmiş uygulama.
+<div align="center">
+
+![Version](https://img.shields.io/badge/version-1.0.0-c9a84c?style=for-the-badge)
+![Platform](https://img.shields.io/badge/platform-Android%20%7C%20PWA-4ecdc4?style=for-the-badge)
+![Expo](https://img.shields.io/badge/Expo-51-000020?style=for-the-badge&logo=expo)
+![React Native](https://img.shields.io/badge/React%20Native-0.74-61dafb?style=for-the-badge&logo=react)
+![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+
+**Kılınamamış namazlarınızı takip edin. Konum bazlı namaz vakitleri. Vakit uyarıları.**
+
+[📱 APK Kurulum](#-apk-kurulum) • [🌐 PWA Kullan](#-pwa-web-uygulaması) • [🚀 Geliştirme](#-geliştirme)
+
+</div>
 
 ---
 
-## 📱 1. PWA (Web Uygulaması) — Hemen Kullanın
+## ✨ Özellikler
 
-### Nasıl Çalıştırılır?
-Dosyaları bir web sunucusuna yükleyin (GitHub Pages, Netlify, Vercel vb.)
+- **📊 Kaza Hesaplama** — Yıl sayısı ve cinsiyet bilgisine göre otomatik hesaplama
+- **🕌 6 Vakit Takibi** — Sabah, Öğle, İkindi, Akşam, Yatsı ve Vitir (erkek)
+- **➕➖ Kolay Güncelleme** — Her vakit için artır/azalt butonu
+- **📍 Konum Bazlı Vakitler** — IP üzerinden otomatik konum, Aladhan API ile Diyanet/Hanefî hesabı
+- **🔔 Vakit Uyarıları** — Uygulama açıkken vakit girişinde ekran uyarısı
+- **♀️ Kadın/Erkek Modu** — Kadın için hayız günleri (~14 gün/yıl) ve Vitir farkı
+- **💾 Kalıcı Veri** — AsyncStorage ile veriler uygulama kapansa da korunur
+- **🌐 PWA Desteği** — Ana ekrana eklenebilir web uygulaması, offline çalışır
 
-**Lokal test için:**
-```bash
-cd kaza-namaz-pwa
-npx serve .
-# veya
-python3 -m http.server 8080
+---
+
+## 🗂️ Proje Yapısı
+
+```
+kaza-namaz-takip/
+│
+├── android/                        # Android native kaynak dosyaları
+│   └── app/src/main/res/
+│       ├── values/colors.xml       # Splash ekran rengi tanımı
+│       └── drawable/splashscreen.xml
+│
+├── pwa/                            # Progressive Web App
+│   ├── index.html                  # Tek sayfalık uygulama (vanilla JS)
+│   ├── manifest.json               # PWA manifest (ana ekrana ekleme)
+│   └── sw.js                       # Service Worker (offline + bildirim)
+│
+├── App.tsx                         # Ana React Native uygulama bileşeni
+├── index.js                        # Uygulama giriş noktası
+├── app.json                        # Expo konfigürasyonu
+├── eas.json                        # EAS Build konfigürasyonu
+├── babel.config.js                 # Babel transpiler ayarları
+├── tsconfig.json                   # TypeScript ayarları
+├── package.json                    # Bağımlılıklar
+└── README.md
 ```
 
-### Android'e Ana Ekrana Eklemek:
-1. Chrome ile uygulamayı açın
-2. Sağ üst köşe → "Ana ekrana ekle"
-3. Artık ikon olarak görünür ve tam ekran çalışır
+---
 
-### Özellikler:
-- ✅ İlk girişte yıl sayısı ve cinsiyet
-- ✅ Sabah, Öğle, İkindi, Akşam, Yatsı, Vitir kaza sayısı
-- ✅ + / − ile artırma/azaltma
-- ✅ Konum bazlı namaz vakitleri (Aladhan API, Hanefî metodu)
-- ✅ Tarayıcı bildirimleri (vakit girince otomatik bildirim)
-- ✅ Service Worker ile offline çalışma
-- ✅ LocalStorage ile veri kalıcılığı
-- ✅ Kadın/Erkek hesabı (hayız günleri, vitr)
+## 📱 APK Kurulum
+
+### Hazır APK
+[Releases](../../releases) sayfasından en güncel APK'yı indirin.
+
+### Kurulum Adımları
+1. APK dosyasını Android telefonunuza indirin
+2. **Ayarlar → Güvenlik → Bilinmeyen kaynaklar** iznini açın
+3. İndirilen APK'yı açıp **Yükle** deyin
+
+> Android 8+ sürümlerde izin, sistem geneli değil uygulama bazlı sorulur.
 
 ---
 
-## 🚀 2. React Native / Expo — Android APK
+## 🌐 PWA (Web Uygulaması)
 
-### Gereksinimler:
-- Node.js 18+
-- Expo CLI: `npm install -g expo-cli eas-cli`
-- Expo hesabı (ücretsiz): https://expo.dev
+`pwa/` klasöründeki dosyaları herhangi bir statik sunucuya yükleyin.
 
-### Kurulum:
+### Netlify / Vercel (önerilen)
 ```bash
-cd kaza-namaz-rn
+# Netlify
+netlify deploy --dir=pwa --prod
+
+# Vercel
+vercel pwa
+```
+
+### Lokal Test
+```bash
+cd pwa
+npx serve .
+# → http://localhost:3000
+```
+
+### Android'e Ana Ekrana Eklemek
+1. Chrome ile uygulamayı açın
+2. Sağ üst menü → **"Ana ekrana ekle"**
+3. Tam ekran uygulama gibi çalışır
+
+---
+
+## 🚀 Geliştirme
+
+### Gereksinimler
+- Node.js 18+
+- npm veya yarn
+- [Expo Go](https://expo.dev/go) (test için)
+
+### Kurulum
+```bash
+git clone https://github.com/kullanici-adi/kaza-namaz-takip.git
+cd kaza-namaz-takip
+
 npm install
 ```
 
-### Lokal Test (Expo Go ile):
+### Expo Go ile Test
 ```bash
-npx expo start
+npx expo start --clear
 ```
-Ardından Android telefonunuzda **Expo Go** uygulamasını açıp QR kodu okutun.
+Terminalde çıkan QR kodu Expo Go uygulamasıyla okutun.
 
-### APK Build (EAS):
+> ⚠️ **Not:** `expo-location` ve `expo-notifications` paketleri Android emülatörde
+> `SecurityException` hatasına yol açtığından bu projede kullanılmamıştır.
+> Konum için `ip-api.com`, bildirimler için `setTimeout + Alert` kullanılmaktadır.
+
+---
+
+## 🏗️ APK Build (EAS)
+
 ```bash
-# Giriş yapın
+# EAS CLI kurulumu (bir kez)
+npm install -g eas-cli
+
+# Expo hesabına giriş
 eas login
 
-# Build konfigürasyonu oluşturun
-eas build:configure
-
-# APK build (ücretsiz, ~10-15 dakika)
+# APK build (~10-15 dakika, Expo bulutunda)
 eas build --platform android --profile preview
 ```
 
-Build tamamlandığında Expo Dashboard'dan APK'yı indirip Android'e yükleyebilirsiniz.
-
-### Google Play'e Yüklemek:
-```bash
-eas build --platform android --profile production
-eas submit --platform android
-```
+Build tamamlandığında [expo.dev](https://expo.dev) hesabınızdan APK'yı indirebilirsiniz.
 
 ---
 
-## 🕌 Namaz Vakti Kaynağı
+## 🧮 Hesaplama Mantığı
 
-**Aladhan API** (ücretsiz, kayıt gerektirmez)
-- URL: `https://api.aladhan.com/v1/timings`
-- Metod: 13 (Diyanet İşleri Başkanlığı)
-- Mezhep: Hanefî (school=1)
+| Cinsiyet | Günlük Vakit | Yıllık Gün | Vitir |
+|:---:|:---:|:---:|:---:|
+| Erkek | 5 | 365 | ✅ Dahil |
+| Kadın | 5 | ~351 (14 gün hayız) | ❌ Dahil değil |
 
----
-
-## 🔔 Bildirim Mantığı
-
-Her gün uygulama açıldığında o günün namaz vakitleri alınır.  
-Her vakit için o vakite zamanlanmış bir bildirim oluşturulur:
-> "🕌 Sabah Vakti – 06:12 — Kaza Sabah namazınızı kılmayı unutmayın!"
+**➖ (Azalt):** Kaza namazı kılındı, sayaç bir düşer  
+**➕ (Artır):** Hesaba eklenmesi gereken ek kaza var
 
 ---
 
-## 📊 Hesaplama Mantığı
+## 🛠️ Kullanılan Teknolojiler
 
-| Cinsiyet | Günlük namaz | Yıllık gün |
-|----------|-------------|-----------|
-| Erkek    | 5 vakit + Vitir | 365 gün |
-| Kadın    | 5 vakit (Vitir yok) | ~351 gün (14 gün hayız) |
+### React Native Bağımlılıkları
+| Paket | Versiyon | Kullanım |
+|---|---|---|
+| `expo` | ~51.0.0 | Temel framework |
+| `expo-linear-gradient` | ~13.0.2 | Gradient butonlar |
+| `@expo-google-fonts/amiri` | ^0.2.3 | Arapça font |
+| `@react-native-async-storage/async-storage` | 1.23.1 | Veri kalıcılığı |
 
-**Azaltma (−):** Kaza namazı kılındı, sayaç düşer  
-**Artırma (+):** Hatalı girilmiş veya eklenmesi gereken kaza var
+### PWA
+| Teknoloji | Kullanım |
+|---|---|
+| Vanilla JS | Uygulama mantığı |
+| Service Worker | Offline destek |
+| Web Notifications API | Vakit bildirimleri |
+| LocalStorage | Veri kalıcılığı |
+
+### Harici API'ler
+| API | Kullanım |
+|---|---|
+| [Aladhan API](https://aladhan.com/prayer-times-api) | Namaz vakitleri (Diyanet/Hanefî metodu) |
+| [ip-api.com](http://ip-api.com) | IP bazlı konum (izin gerektirmez) |
 
 ---
 
-## 🛠 Teknolojiler
+## 🤝 Katkı
 
-**PWA:** Vanilla HTML/CSS/JS, Service Worker, Web Notifications API  
-**React Native:** Expo 50, expo-location, expo-notifications, AsyncStorage, expo-linear-gradient
+Pull request ve issue'lar memnuniyetle karşılanır.
+
+1. Fork edin
+2. Feature branch oluşturun (`git checkout -b feature/yeni-ozellik`)
+3. Commit edin (`git commit -m 'feat: yeni özellik eklendi'`)
+4. Push edin (`git push origin feature/yeni-ozellik`)
+5. Pull Request açın
+
+---
+
+## 📄 Lisans
+
+MIT © 2025
+
+---
+
+<div align="center">
+
+**بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ**
+
+*"Namazı dosdoğru kılın."* — Bakara 2:43
+
+</div>
