@@ -6,7 +6,6 @@
 ![Platform](https://img.shields.io/badge/platform-Android%20%7C%20PWA-4ecdc4?style=for-the-badge)
 ![Expo](https://img.shields.io/badge/Expo-51-000020?style=for-the-badge&logo=expo)
 ![React Native](https://img.shields.io/badge/React%20Native-0.74-61dafb?style=for-the-badge&logo=react)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 
 **Kılınamamış namazlarınızı takip edin. Konum bazlı namaz vakitleri. Vakit uyarıları.**
 
@@ -188,12 +187,6 @@ Pull request ve issue'lar memnuniyetle karşılanır.
 3. Commit edin (`git commit -m 'feat: yeni özellik eklendi'`)
 4. Push edin (`git push origin feature/yeni-ozellik`)
 5. Pull Request açın
-
----
-
-## 📄 Lisans
-
-MIT © 2025
 
 ---
 
